@@ -271,12 +271,6 @@
                                 </SemanticZoom>
                             </Grid>
                         </PivotItem>
-                        <PivotItem Header="Icons">
-                            <TextBlock Margin="12,0,12,12" Text="Coming soon in Laney!"/>
-                        </PivotItem>
-                        <PivotItem Header="Stickers">
-                            <TextBlock Margin="12,0,12,12" Text="Coming soon in Laney!"/>
-                        </PivotItem>
                     </Pivot>
                 </Grid>
             </SplitView.Pane>
