@@ -1,0 +1,285 @@
+﻿<Page
+    x:Class="EmojiAvatar.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:EmojiAvatar"
+    xmlns:data="using:EmojiAvatar.DataModels"
+    xmlns:wuxdata="using:Windows.UI.Xaml.Data"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    xmlns:muxm="using:Microsoft.UI.Xaml.Media"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:win1809="http://schemas.microsoft.com/winfx/2006/xaml/presentation?IsApiContractPresent(Windows.Foundation.UniversalApiContract, 7)"
+    mc:Ignorable="d"
+    SizeChanged="OnRootSizeChanged"
+    Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}" Loaded="Setup">
+
+    <Page.Resources>
+        <local:InverseBoolToVisibilityConverter x:Key="ibtv"/>
+        <CollectionViewSource x:Name="GroupedEmojisCVS" Source="{Binding GroupedEmojis, Mode=OneWay}" IsSourceGrouped="True" ItemsPath="Items"/>
+        <muxm:AcrylicBrush x:Key="paneBackground" FallbackColor="{ThemeResource SolidBackgroundFillColorQuarternary}" TintColor="Transparent" TintOpacity="0"/>
+
+        <win1809:Style x:Key="LeftSideButtonStyle" TargetType="Button">
+            <!--<Setter Property="BorderThickness" Value="1,1,0,1"/>-->
+            <Setter Property="CornerRadius" Value="4,0,0,4"/>
+        </win1809:Style>
+        <win1809:Style x:Key="RightSideButtonStyle" TargetType="Button">
+            <Setter Property="BorderThickness" Value="0,1,1,1"/>
+            <Setter Property="CornerRadius" Value="0,4,4,0"/>
+        </win1809:Style>
+
+        <win1809:Style x:Key="LeftSideToggleButtonStyle" TargetType="ToggleButton">
+            <Setter Property="BorderThickness" Value="1,1,0,1"/>
+            <Setter Property="CornerRadius" Value="4,0,0,4"/>
+        </win1809:Style>
+        <win1809:Style x:Key="RightSideToggleButtonStyle" TargetType="ToggleButton">
+            <Setter Property="BorderThickness" Value="0,1,1,1"/>
+            <Setter Property="CornerRadius" Value="0,4,4,0"/>
+        </win1809:Style>
+        <win1809:Style x:Key="MiddleToggleButtonStyle" TargetType="ToggleButton">
+            <Setter Property="CornerRadius" Value="0"/>
+        </win1809:Style>
+    </Page.Resources>
+    
+    <Grid x:Name="RootGrid" Background="{ThemeResource NavigationViewContentBackground}" BorderBrush="{ThemeResource NavigationViewContentGridBorderBrush}" BorderThickness="1" CornerRadius="8" MaxWidth="720" MaxHeight="640" Margin="0,32">
+        <muxc:ProgressRing HorizontalAlignment="Center" VerticalAlignment="Center" Width="64" Height="64" IsIndeterminate="True" Visibility="{Binding IsReady, Converter={StaticResource ibtv}}"/>
+        <SplitView x:Name="splitView" Visibility="{Binding IsReady}" PanePlacement="Right" DisplayMode="Inline" OpenPaneLength="400" IsPaneOpen="True" PaneBackground="Transparent">
+            <SplitView.Content>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition />
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Viewbox Width="256" Height="256" VerticalAlignment="Top" Margin="0,48,0,6">
+                        <Canvas x:Name="canvas" Width="320" Height="320">
+                            <Canvas x:Name="workCanvas" Width="320" Height="320">
+                                <Rectangle Width="320" Height="320">
+                                    <Rectangle.Fill>
+                                        <LinearGradientBrush x:Name="gradientBrush" StartPoint="0,0" EndPoint="1,1">
+                                            <LinearGradientBrush.GradientStops>
+                                                <GradientStop Color="{Binding GradientStartColor}" Offset="0"/>
+                                                <GradientStop Color="{Binding GradientEndColor}" Offset="1"/>
+                                            </LinearGradientBrush.GradientStops>
+                                        </LinearGradientBrush>
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                                <!-- Placeholder, removed and replaced by emoji or something in code-behind -->
+                                <Rectangle/>
+                            </Canvas>
+                            <Path x:Name="avaMask" Width="320" Height="320" Fill="{ThemeResource SystemControlBackgroundAltMediumHighBrush}" Data="M 0 0 L 0 160 A 160 160 0 0 1 160 0 L 0 0 z M 160 0 A 160 160 0 0 1 320 160 L 320 0 L 160 0 z M 320 160 A 160 160 0 0 1 160 320 L 320 320 L 320 160 z M 160 320 A 160 160 0 0 1 0 160 L 0 320 L 160 320 z"/>
+                        </Canvas>
+                    </Viewbox>
+                    <StackPanel Grid.Row="1" Margin="0,6,0,6" MaxWidth="268">
+                        <Grid x:Name="gradientsTools">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel x:Name="gradientColorsPickers" Orientation="Horizontal">
+                                <Button x:Name="startGradBtn" Style="{StaticResource LeftSideButtonStyle}" Margin="6,6,0,6" Padding="0">
+                                    <Button.Flyout>
+                                        <Flyout win1809:ShouldConstrainToRootBounds="False">
+                                            <muxc:ColorPicker Margin="12" Color="{Binding GradientStartColor, Mode=TwoWay}" ColorSpectrumShape="Ring" IsColorSliderVisible="True" IsColorChannelTextInputVisible="True" IsHexInputVisible="True"/>
+                                        </Flyout>
+                                    </Button.Flyout>
+                                    <Border Width="16" Height="16" Margin="7" BorderThickness="1" BorderBrush="Black">
+                                        <Border.Background>
+                                            <SolidColorBrush Color="{Binding GradientStartColor}"/>
+                                        </Border.Background>
+                                    </Border>
+                                </Button>
+                                <Button x:Name="endGradBtn" Style="{StaticResource RightSideButtonStyle}" Margin="0,6,6,6" Padding="0">
+                                    <Button.Flyout>
+                                        <Flyout win1809:ShouldConstrainToRootBounds="False">
+                                            <muxc:ColorPicker Margin="12" Color="{Binding GradientEndColor, Mode=TwoWay}" ColorSpectrumShape="Ring" IsColorSliderVisible="True" IsColorChannelTextInputVisible="True" IsHexInputVisible="True"/>
+                                        </Flyout>
+                                    </Button.Flyout>
+                                    <Border Width="16" Height="16" Margin="7" BorderThickness="1" BorderBrush="Black">
+                                        <Border.Background>
+                                            <SolidColorBrush Color="{Binding GradientEndColor}"/>
+                                        </Border.Background>
+                                    </Border>
+                                </Button>
+                            </StackPanel>
+                            <muxc:DropDownButton Grid.Column="2" Margin="6" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="8,5,6,6" Content="Presets">
+                                <muxc:DropDownButton.Flyout>
+                                    <Flyout Placement="Bottom">
+                                        <muxc:ItemsRepeaterScrollHost>
+                                            <ScrollViewer>
+                                                <muxc:ItemsRepeater ItemsSource="{Binding GradientPresets}" Margin="6">
+                                                    <muxc:ItemsRepeater.Layout>
+                                                        <muxc:UniformGridLayout MinItemWidth="44" MinItemHeight="44" MinRowSpacing="0" MinColumnSpacing="0" MaximumRowsOrColumns="6"/>
+                                                    </muxc:ItemsRepeater.Layout>
+                                                    <muxc:ItemsRepeater.ItemTemplate>
+                                                        <DataTemplate x:DataType="data:GradientPreset">
+                                                            <HyperlinkButton Tag="{x:Bind}" Width="44" Height="44" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Click="SetGradient">
+                                                                <Ellipse Width="32" Height="32" StrokeThickness="1" Stroke="#1f000000">
+                                                                    <Ellipse.Fill>
+                                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                                            <LinearGradientBrush.GradientStops>
+                                                                                <GradientStop Offset="0" Color="{x:Bind StartColor}"/>
+                                                                                <GradientStop Offset="1" Color="{x:Bind EndColor}"/>
+                                                                            </LinearGradientBrush.GradientStops>
+                                                                        </LinearGradientBrush>
+                                                                    </Ellipse.Fill>
+                                                                </Ellipse>
+                                                            </HyperlinkButton>
+                                                        </DataTemplate>
+                                                    </muxc:ItemsRepeater.ItemTemplate>
+                                                </muxc:ItemsRepeater>
+                                            </ScrollViewer>
+                                        </muxc:ItemsRepeaterScrollHost>
+                                    </Flyout>
+                                </muxc:DropDownButton.Flyout>
+                            </muxc:DropDownButton>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,6">
+                                <ToggleButton x:Name="directionLTRBtn" Style="{StaticResource LeftSideToggleButtonStyle}" Padding="7" IsChecked="True" Click="ChangeGradientDirectionToLTR">
+                                    <FontIcon FontSize="16" Glyph=""/>
+                                </ToggleButton>
+                                <ToggleButton x:Name="directionTTBBtn" Style="{StaticResource MiddleToggleButtonStyle}" Padding="7" Click="ChangeGradientDirectionToTTB">
+                                    <FontIcon FontSize="16" Glyph=""/>
+                                </ToggleButton>
+                                <ToggleButton x:Name="directionRTLBtn" Style="{StaticResource RightSideToggleButtonStyle}" Padding="7" Click="ChangeGradientDirectionToRTL">
+                                    <FontIcon FontSize="16" Glyph="">
+                                        <FontIcon.RenderTransform>
+                                            <ScaleTransform ScaleX="-1" CenterX="8"/>
+                                        </FontIcon.RenderTransform>
+                                    </FontIcon>
+                                </ToggleButton>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                    
+                    <StackPanel Grid.Row="2" Margin="0,6,0,26" MaxWidth="268">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <Button x:Name="randomBtn" Margin="6" HorizontalAlignment="Stretch" Content="Random" Click="GenerateRandomAvatar"/>
+                            <Button x:Name="chooseBtn" Grid.Column="1" Margin="6" HorizontalAlignment="Stretch" Content="Change" Click="OpenRightPanel"/>
+                            <Button x:Name="saveBtn" Grid.Row="1" Grid.ColumnSpan="2" Style="{StaticResource AccentButtonStyle}" Margin="6" HorizontalAlignment="Stretch" Content="Save" Click="SaveAvatar"/>
+                            <!--<Button x:Name="setBtn" Grid.Row="1" Grid.Column="1" Style="{StaticResource AccentButtonStyle}" Margin="6" HorizontalAlignment="Stretch" Content="Set to chat"/>-->
+                        </Grid>
+                    </StackPanel>
+                    <Rectangle x:Name="paneSeparator" HorizontalAlignment="Right" Grid.RowSpan="2" Width="1" Fill="{ThemeResource CardStrokeColorDefaultBrush}"/>
+                </Grid>
+            </SplitView.Content>
+            <SplitView.Pane>
+                <Grid x:Name="paneRoot" Background="{ThemeResource LayerFillColorDefaultBrush}">
+                    <Pivot x:Name="panePivot">
+                        <Pivot.LeftHeader>
+                            <HyperlinkButton x:Name="paneCloseBtn" Width="32" Height="32" Margin="8,8,0,8" Padding="0" Foreground="{ThemeResource ApplicationForegroundThemeBrush}" Click="CloseRightPanel">
+                                <FontIcon FontSize="16" Glyph=""/>
+                            </HyperlinkButton>
+                        </Pivot.LeftHeader>
+                        <PivotItem Header="Emoji">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <Grid x:Name="emojiTools">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Button Width="32" Height="32" Margin="8" Padding="0">
+                                        <Button.Flyout>
+                                            <Flyout Placement="Top">
+                                                <ListView Margin="8" MaxWidth="216" ItemsSource="{Binding EmojiSkinTones}" SelectedItem="{Binding EmojiCurrentSkinTone, Mode=TwoWay}" ScrollViewer.VerticalScrollMode="Disabled" ScrollViewer.HorizontalScrollMode="Enabled" ScrollViewer.IsHorizontalRailEnabled="True">
+                                                    <ListView.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <StackPanel Orientation="Horizontal"/>
+                                                        </ItemsPanelTemplate>
+                                                    </ListView.ItemsPanel>
+                                                    <ListView.ItemContainerStyle>
+                                                        <Style TargetType="ListViewItem">
+                                                            <Setter Property="Margin" Value="0"/>
+                                                            <Setter Property="Padding" Value="0"/>
+                                                            <Setter Property="MinWidth" Value="32"/>
+                                                            <Setter Property="MinHeight" Value="32"/>
+                                                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                                                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                                        </Style>
+                                                    </ListView.ItemContainerStyle>
+                                                    <ListView.ItemTemplate>
+                                                        <DataTemplate x:DataType="data:EmojiSkinTone">
+                                                            <Border Width="32" Height="32" Background="Transparent" ToolTipService.ToolTip="{x:Bind Name}">
+                                                                <Ellipse Width="22" Height="22" StrokeThickness="1" Stroke="#1f000000">
+                                                                    <Ellipse.Fill>
+                                                                        <SolidColorBrush Color="{x:Bind Color}"/>
+                                                                    </Ellipse.Fill>
+                                                                </Ellipse>
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </ListView.ItemTemplate>
+                                                </ListView>
+                                            </Flyout>
+                                        </Button.Flyout>
+                                        <Ellipse Width="22" Height="22" StrokeThickness="1" Stroke="#1f000000">
+                                            <Ellipse.Fill>
+                                                <SolidColorBrush Color="{Binding EmojiCurrentSkinTone.Color}"/>
+                                            </Ellipse.Fill>
+                                        </Ellipse>
+                                    </Button>
+                                    <AutoSuggestBox Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0" QueryIcon="Find" Text="{Binding EmojiSearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Find emoji..."/>
+                                </Grid>
+                                <SemanticZoom Grid.Row="1">
+                                    <SemanticZoom.ZoomedInView>
+                                        <GridView ItemsSource="{x:Bind GroupedEmojisCVS.View, Mode=OneWay}" SelectedItem="{Binding SelectedEmoji, Mode=TwoWay}" Margin="6,0" ShowsScrollingPlaceholders="False" SelectionChanged="DrawEmojiInCanvas" IsItemClickEnabled="True" ItemClick="ListViewItemClicked">
+                                            <GridView.ItemContainerStyle>
+                                                <Style TargetType="GridViewItem">
+                                                    <Setter Property="MinWidth" Value="32"/>
+                                                    <Setter Property="MinHeight" Value="32"/>
+                                                    <Setter Property="Margin" Value="2,0,0,2"/>
+                                                    <Setter Property="Padding" Value="4"/>
+                                                </Style>
+                                            </GridView.ItemContainerStyle>
+                                            <GridView.GroupStyle>
+                                                <GroupStyle HidesIfEmpty="True">
+                                                    <GroupStyle.HeaderTemplate>
+                                                        <DataTemplate x:DataType="data:AvatarCreatorItemCollection">
+                                                            <Border Height="32">
+                                                                <TextBlock Margin="6,0,6,4" VerticalAlignment="Bottom" Text="{Binding Name}" Foreground="{ThemeResource ApplicationSecondaryForegroundThemeBrush}" Style="{StaticResource CaptionTextBlockStyle}" FontWeight="SemiBold"/>
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </GroupStyle.HeaderTemplate>
+                                                </GroupStyle>
+                                            </GridView.GroupStyle>
+                                            <GridView.ItemTemplate>
+                                                <DataTemplate x:DataType="data:Emoji">
+                                                    <Border Width="32" Height="32" DataContextChanged="DrawEmojiInGVI"/>
+                                                </DataTemplate>
+                                            </GridView.ItemTemplate>
+                                        </GridView>
+                                    </SemanticZoom.ZoomedInView>
+                                    <SemanticZoom.ZoomedOutView>
+                                        <ListView ItemsSource="{x:Bind GroupedEmojisCVS.View.CollectionGroups, Mode=OneWay}">
+                                            <ListView.ItemTemplate>
+                                                <DataTemplate x:DataType="wuxdata:ICollectionViewGroup">
+                                                    <TextBlock Text="{x:Bind ((data:AvatarCreatorItemCollection)Group).Name}"/>
+                                                </DataTemplate>
+                                            </ListView.ItemTemplate>
+                                        </ListView>
+                                    </SemanticZoom.ZoomedOutView>
+                                </SemanticZoom>
+                            </Grid>
+                        </PivotItem>
+                        <PivotItem Header="Icons">
+                            <TextBlock Margin="12,0,12,12" Text="Coming soon in Laney!"/>
+                        </PivotItem>
+                        <PivotItem Header="Stickers">
+                            <TextBlock Margin="12,0,12,12" Text="Coming soon in Laney!"/>
+                        </PivotItem>
+                    </Pivot>
+                </Grid>
+            </SplitView.Pane>
+        </SplitView>
+    </Grid>
+</Page>
